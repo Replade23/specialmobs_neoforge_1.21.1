@@ -1,0 +1,156 @@
+package fathertoast.specialmobs.common.util;
+
+import fathertoast.specialmobs.common.core.SpecialMobs;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+
+public final class References {
+    
+    /** The speed boost to apply to baby mobs. */
+    public static final AttributeModifier BABY_SPEED_BOOST = new AttributeModifier(
+            SpecialMobs.rl( "baby_speed_boost" ), 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_BASE ); // 1.21: id replaces UUID+name
+    
+    
+    //--------------- BESTIARY REFLECTION ----------------
+    
+    public static final String ENTITY_PACKAGE = "fathertoast." + SpecialMobs.MOD_ID + ".common.entity.";
+    public static final String VANILLA_REPLACEMENT_FORMAT = "%s._Special%sEntity";
+    public static final String SPECIAL_VARIANT_FORMAT = "%s.%sEntity";
+    
+    private static final String TEXTURE_FORMAT = "textures/entity/%s/%s%s.png";
+    public static final String TEXTURE_BASE_SUFFIX = "";
+    public static final String TEXTURE_EYES_SUFFIX = "_eyes";
+    public static final String TEXTURE_OVERLAY_SUFFIX = "_overlay";
+    public static final String TEXTURE_ANIMATION_SUFFIX = "_anim";
+    public static final String TEXTURE_ANIMATION_EYES_SUFFIX = "_anim_eyes";
+    
+    public static ResourceLocation getEntityTexture( String path, String fileName ) { return getEntityTexture( path, fileName, "" ); }
+    
+    @SuppressWarnings( "unused" )
+    public static ResourceLocation getEntityBaseTexture( String path, String fileName ) {
+        return getEntityTexture( path, fileName, TEXTURE_BASE_SUFFIX );
+    }
+    
+    public static ResourceLocation getEntityEyesTexture( String path, String fileName ) {
+        return getEntityTexture( path, fileName, TEXTURE_EYES_SUFFIX );
+    }
+    
+    @SuppressWarnings( "unused" )
+    public static ResourceLocation getEntityOverlayTexture( String path, String fileName ) {
+        return getEntityTexture( path, fileName, TEXTURE_OVERLAY_SUFFIX );
+    }
+    
+    @SuppressWarnings( "unused" )
+    public static ResourceLocation getEntityShootingTexture( String path, String fileName ) {
+        return getEntityTexture( path, fileName, TEXTURE_ANIMATION_SUFFIX );
+    }
+    
+    public static ResourceLocation getEntityShootingEyesTexture( String path, String fileName ) {
+        return getEntityTexture( path, fileName, TEXTURE_ANIMATION_EYES_SUFFIX );
+    }
+    
+    public static ResourceLocation getEntityTexture( String path, String fileName, String suffix ) {
+        return SpecialMobs.rl( String.format( TEXTURE_FORMAT, path, fileName, suffix ) );
+    }
+    
+    //--------------- NBT STUFF ----------------
+    
+    // Forge data
+    public static final String TAG_FORGE_DATA = "ForgeData";
+    public static final String TAG_INIT = "SpecialMobsInit";
+    
+    // Special mob data
+    public static final String TAG_SPECIAL_MOB_DATA = "SpecialMobsData";
+    public static final String TAG_RENDER_SCALE = "RenderScale";
+    public static final String TAG_EXPERIENCE = "Experience";
+    public static final String TAG_REGENERATION = "Regeneration";
+    //    public static final String TAG_TEXTURE = "Texture";
+    //    public static final String TAG_TEXTURE_EYES = "TextureEyes";
+    //    public static final String TAG_TEXTURE_OVER = "TextureOverlay";
+    public static final String TAG_FALL_MULTI = "FallMulti";
+    public static final String TAG_FIRE_IMMUNE = "FireImmune";
+    public static final String TAG_BURN_IMMUNE = "BurningImmune";
+    public static final String TAG_LEASHABLE = "Leashable";
+    public static final String TAG_TRAP_IMMUNE = "UnderPressure";
+    public static final String TAG_DROWN_IMMUNE = "DrownImmune";
+    public static final String TAG_WATER_PUSH_IMMUNE = "WaterPushImmune";
+    public static final String TAG_WATER_DAMAGE = "WaterDamage";
+    public static final String TAG_STICKY_IMMUNE = "StickyImmune";
+    public static final String TAG_POTION_IMMUNE = "PotionImmune";
+    public static final String TAG_RANGED_DAMAGE = "RangedDamage";
+    public static final String TAG_RANGED_SPREAD = "RangedSpread";
+    public static final String TAG_RANGED_WALK_SPEED = "RangedWalkSpeed";
+    public static final String TAG_RANGED_COOLDOWN_MIN = "RangedCDMin";
+    public static final String TAG_RANGED_COOLDOWN_MAX = "RangedCDMax";
+    public static final String TAG_MAX_RANGE = "MaxRange";
+    
+    // Misc entities
+    public static final String TAG_BOAT_TYPE = "Type";
+    
+    // Projectiles
+    public static final String TAG_KNOCKBACK = "Knockback";
+    public static final String TAG_TRIDENT_EFFECT = "TridentEffect";
+    
+    // Creepers
+    public static final String TAG_SUPERCHARGED = "Supercharged";
+    public static final String TAG_DRY_EXPLODE = "CannotExplodeWhileWet";
+    public static final String TAG_WHILE_BURNING_EXPLODE = "ExplodesWhileBurning";
+    public static final String TAG_WHEN_SHOT_EXPLODE = "ExplodesWhenShot";
+    
+    // Witches
+    public static final String TAG_SHEATHED_ITEM = "SheathedItem";
+    public static final String TAG_POTION_USE_TIME = "PotionUseTimer";
+    
+    // Blazes
+    public static final String TAG_BURST_COUNT = "FireballBurstCount";
+    public static final String TAG_BURST_DELAY = "FireballBurstDelay";
+    
+    // Baby-able families - Skeletons, Wither Skeletons
+    public static final String TAG_IS_BABY = "IsBaby";
+    
+    // Shifting mobs - Corporeal Shift Ghast
+    public static final String TAG_IS_SHIFTED = "IsShifted";
+    public static final String TAG_SHIFT_TIME = "ShiftTime";
+    
+    // Spawner mobs
+    public static final String TAG_BABIES = "Babies"; // Mother (Cave) Spider, Wilds Witch, Queen Ghast, Wildfire Blaze
+    public static final String TAG_EXTRA_BABIES = "ExtraBabies"; // Splitting Creeper, Mother (Cave) Spider, Wilds Witch
+    public static final String TAG_SUMMONS = "Summons"; // Drowning Creeper, Undead Witch, Wilds Witch, Queen Ghast, Wildfire Blaze
+    
+    // Growing mobs
+    public static final String TAG_GROWTH_LEVEL = "GrowthLevel"; // Hungry Spider, Conflagration Blaze
+    public static final String TAG_HEALTH_STACKS = "HealthStacks"; // Hungry Spider
+    
+    // Misc.
+    public static final String TAG_FUSE_TIME = "FuseTime"; // Blackberry Slime, Volatile Magma Cube
+    public static final String TAG_AMMO = "Ammo"; // Web (Cave) Spider, Mad Scientist Zombie, Desiccated Silverfish, Armored Blaze
+    public static final String TAG_IS_FAKE = "IsFake"; // Mirage Enderman
+    public static final String TAG_EXPLOSION_POWER = "ExplosionPower"; // Hellfire Blaze
+    
+    
+    //--------------- INTERNATIONALIZATION ----------------
+    
+    /** This method provides helper tags to make linking translations up easier, and also enforces the correct array length. */
+    @SuppressWarnings( "UnnecessaryUnicodeEscape" )
+    public static String[] translations( String key, String en, String es, String pt, String fr, String it, String de, String pir ) {
+        // Note that this must match up EXACTLY to the TranslationKey enum in SMLanguageProvider
+        String[] translation = { key, en, es, pt, fr, it, de, pir };
+        
+        // Fix the encoding to allow us to use accented characters in the translation string literals
+        // Note: If a translation uses any non-ASCII characters, make sure they are all in this matrix! (case-sensitive)
+        final String[][] utf8ToUnicode = {
+                { "à", "\u00E0" }, { "á", "\u00E1" }, { "ã", "\u00E3" }, { "ä", "\u00E4" },
+                { "ç", "\u00E7" },
+                { "è", "\u00E8" }, { "é", "\u00E9" }, { "ê", "\u00EA" },
+                { "í", "\u00ED" },
+                { "ó", "\u00F3" }, { "õ", "\u00F5" }, { "ö", "\u00F6" },
+                { "ù", "\u00F9" }, { "û", "\u00FB" }, { "ü", "\u00FC" },
+                { "œ", "\u0153" }
+        };
+        for( int i = 1; i < translation.length; i++ ) {
+            for( String[] fix : utf8ToUnicode )
+                translation[i] = translation[i].replace( fix[0], fix[1] ); // Note: This is kinda dumb, but it works so idc
+        }
+        return translation;
+    }
+}
