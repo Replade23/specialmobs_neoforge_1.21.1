@@ -1,0 +1,110 @@
+package fathertoast.specialmobs.common.event;
+
+import fathertoast.specialmobs.crust.api.config.common.value.environment.EnvironmentContext;
+import fathertoast.specialmobs.common.bestiary.MobFamily;
+import fathertoast.specialmobs.common.config.Config;
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+
+public final class NaturalSpawnManager {
+    
+    /**
+     * Holder for the RegisterSpawnPlacementsEvent when it is fired. Temporarily stored as a field to
+     * avoid passing the event around as an argument in a bazillion methods.
+     */
+    private static RegisterSpawnPlacementsEvent registerEvent;
+    
+    //--------------- Spawn Placement Registration ----------------
+    
+    /** Sets the natural spawn placement rules for entity types. */
+    public static void registerSpawnPlacements( RegisterSpawnPlacementsEvent event ) {
+        registerEvent = event;
+        
+        // Bestiary-generated entities
+        for( MobFamily.Species<?> species : MobFamily.getAllSpecies() ) {
+            species.registerSpawnPlacement();
+        }
+        
+        // Additional entries
+        event.register( EntityType.CAVE_SPIDER, SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, NaturalSpawnManager::checkSpawnRulesCaveSpider,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE );
+        
+        registerEvent = null;
+    }
+    
+    public static void registerSpawnPlacement( MobFamily.Species<? extends Monster> species ) {
+        registerSpawnPlacement( species, SpawnPlacementTypes.ON_GROUND );
+    }
+    
+    public static void registerSpawnPlacement( MobFamily.Species<? extends Monster> species,
+                                               SpawnPlacementType type ) {
+        registerSpawnPlacement( species, type, NaturalSpawnManager::checkSpawnRulesDefault );
+    }
+    
+    public static <T extends Mob> void registerSpawnPredicate( MobFamily.Species<T> species,
+                                                               SpawnPlacements.SpawnPredicate<T> predicate ) {
+        registerSpawnPlacement( species, SpawnPlacementTypes.ON_GROUND, predicate );
+    }
+    
+    public static <T extends Mob> void registerSpawnPlacement( MobFamily.Species<T> species,
+                                                               SpawnPlacementType type,
+                                                               SpawnPlacements.SpawnPredicate<T> predicate ) {
+        registerEvent.register( species.entityType.get(), type, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, predicate, RegisterSpawnPlacementsEvent.Operation.AND );
+    }
+    
+    public static boolean checkSpawnRulesDefault( EntityType<? extends Monster> type, ServerLevelAccessor level,
+                                                  MobSpawnType spawnType, BlockPos pos, RandomSource random ) {
+        return Monster.checkMonsterSpawnRules( type, level, spawnType, pos, random ) &&
+                checkSpawnRulesConfigured( type, level, spawnType, pos, random );
+    }
+    
+    public static boolean checkSpawnRulesIgnoreLight( EntityType<? extends Monster> type, ServerLevelAccessor level,
+                                                      MobSpawnType spawnType, BlockPos pos, RandomSource random ) {
+        return Monster.checkAnyLightMonsterSpawnRules( type, level, spawnType, pos, random ) &&
+                checkSpawnRulesConfigured( type, level, spawnType, pos, random );
+    }
+    
+    @SuppressWarnings( "unused" )
+    public static boolean checkSpawnRulesBasic( EntityType<? extends Mob> type, ServerLevelAccessor level,
+                                                MobSpawnType spawnType, BlockPos pos, RandomSource random ) {
+        return level.getDifficulty() != Difficulty.PEACEFUL && Mob.checkMobSpawnRules( type, level, spawnType, pos, random ) &&
+                checkSpawnRulesConfigured( type, level, spawnType, pos, random );
+    }
+    
+    public static boolean checkSpawnRulesWater( EntityType<? extends Mob> type, ServerLevelAccessor level,
+                                                MobSpawnType spawnType, BlockPos pos, RandomSource random ) {
+        return level.getDifficulty() != Difficulty.PEACEFUL && Monster.isDarkEnoughToSpawn( level, pos, random ) &&
+                (spawnType == MobSpawnType.SPAWNER || level.getFluidState( pos ).is( FluidTags.WATER )) &&
+                checkSpawnRulesConfigured( type, level, spawnType, pos, random );
+    }
+    
+    public static boolean checkSpawnRulesConfigured( EntityType<? extends LivingEntity> type, ServerLevelAccessor levelAccessor,
+                                                     MobSpawnType spawnType, BlockPos pos, RandomSource random ) {
+        if( spawnType == MobSpawnType.NATURAL ) {
+            final MobFamily.Species<?> species = MobFamily.Species.of( type );
+            if( species != null && levelAccessor instanceof Level level ) {
+                return species.config.GENERAL.naturalSpawnChance.rollChance( random, EnvironmentContext.withTarget( level, pos ) );
+            }
+        }
+        return true;
+    }
+    
+    public static boolean checkSpawnRulesCaveSpider( EntityType<CaveSpider> type, ServerLevelAccessor levelAccessor,
+                                                     MobSpawnType spawnType, BlockPos pos, RandomSource random ) {
+        if( spawnType == MobSpawnType.NATURAL && levelAccessor instanceof Level level &&
+                !Config.MAIN.ADDED_SPAWNS.caveSpiderSpawnChance.rollChance( random, EnvironmentContext.withTarget( level, pos ) ) ) {
+            return false;
+        }
+        return Monster.checkMonsterSpawnRules( type, levelAccessor, spawnType, pos, random );
+    }
+}
