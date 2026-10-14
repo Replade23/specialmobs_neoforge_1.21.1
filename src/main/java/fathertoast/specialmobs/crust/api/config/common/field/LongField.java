@@ -1,0 +1,241 @@
+package fathertoast.specialmobs.crust.api.config.common.field;
+
+import fathertoast.specialmobs.crust.api.config.common.ConfigUtil;
+import fathertoast.specialmobs.crust.api.config.common.file.CrustConfigSpec;
+import fathertoast.specialmobs.crust.api.config.common.file.TomlHelper;
+import fathertoast.specialmobs.crust.api.lib.CrustMath;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.RandomSource;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Random;
+
+/**
+ * Represents a config field with a long value.
+ */
+public class LongField extends AbstractConfigField<Long> {
+    
+    /** The minimum field value. */
+    private final long valueMin;
+    /** The maximum field value. */
+    private final long valueMax;
+    
+    /** Creates a new field that accepts a common range of values. */
+    public LongField( String key, long defaultValue, LongField.Range range, @Nullable String... description ) {
+        this( key, defaultValue, range.MIN, range.MAX, description );
+    }
+    
+    /** Creates a new field that accepts a specialized range of values. */
+    public LongField( String key, long defaultValue, long min, long max, @Nullable String... description ) {
+        super( key, defaultValue, description );
+        valueMin = min;
+        valueMax = max;
+        
+        // Sanity checks
+        if( min >= max ) {
+            throw new IllegalArgumentException( "Maximum value must be greater than the minimum! Invalid field: " + getKey() );
+        }
+        if( defaultValue < min || defaultValue > max ) {
+            throw new IllegalArgumentException( "Default value is outside of allowed range! Invalid field: " + getKey() );
+        }
+    }
+    
+    /** @return Returns the config field's value. */
+    public long getLong() { return get(); }
+    
+    /** @return Returns the config field's value cast down to a 32-bit integer. */
+    public int getInt() { return (int) getLong(); }
+    
+    /** @return Treats the config field's value as a 1-in-X chance and returns the result of a single roll. */
+    public boolean rollChance( Random random ) { return getLong() > 0 && random.nextLong( getLong() ) == 0; }
+    
+    /** @return Returns the minimum value allowed by this field. */
+    public long minValue() { return valueMin; }
+    
+    /** @return Returns the maximum value allowed by this field. */
+    public long maxValue() { return valueMax; }
+    
+    /** Adds info about the field type, format, and bounds to the end of a field's description. */
+    @Override
+    public void appendFieldInfo( List<String> comment ) {
+        comment.add( TomlHelper.fieldInfoRange( getDefaultValue(), minValue(), maxValue() ) );
+    }
+    
+    /**
+     * @return Reads a value from the given value or raw toml. If anything goes wrong, correct it at the lowest level
+     * possible.
+     * <p>
+     * For example, a missing or unreadable value should return the default value, while an out-of-range value should be
+     * adjusted to the nearest in-range value. If any value correction is applied, print a warning to explain the change.
+     */
+    @Override
+    public Long parse( Object raw ) {
+        Number value = TomlHelper.readAsNumber( this, raw );
+        if( value == null ) {
+            ConfigUtil.warnFor( this );
+            ConfigUtil.LOG.warn( "Invalid long! Falling back to default ({}). Invalid value: {}",
+                    getDefaultValue(), raw );
+            return getDefaultValue();
+        }
+        long castValue = value.longValue();
+        if( castValue < minValue() ) {
+            ConfigUtil.warnFor( this );
+            ConfigUtil.LOG.warn( "Value is below the minimum! Adjusting from {} to {}.", raw, minValue() );
+            return minValue();
+        }
+        else if( castValue > maxValue() ) {
+            ConfigUtil.warnFor( this );
+            ConfigUtil.LOG.warn( "Value is above the maximum! Adjusting from {} to {}.", raw, maxValue() );
+            return maxValue();
+        }
+        if( TomlHelper.numberHasDecimal( value ) ) {
+            ConfigUtil.warnFor( this );
+            ConfigUtil.LOG.warn( "Floating point value given for integer! Truncating value {} to {}.",
+                    raw, castValue );
+        }
+        return castValue;
+    }
+    
+    /** Writes a field value to the byte buffer; should be the inverse of {@link #deserialize}. */
+    @Override
+    public void serialize( Long value, FriendlyByteBuf buffer ) { buffer.writeLong( value ); }
+    
+    /** Reads a new field value from the byte buffer; should be the inverse of {@link #serialize}. */
+    @Override
+    public Long deserialize( FriendlyByteBuf buffer ) { return buffer.readLong(); }
+    
+    
+    
+    /** A set of commonly used ranges for this field type. */
+    public enum Range {
+        
+        /** Accepts any value. */
+        ANY( Long.MIN_VALUE, Long.MAX_VALUE ),
+        /** Accepts any positive value (> 0). */
+        POSITIVE( 1, Long.MAX_VALUE ),
+        /** Accepts any non-negative value (>= 0). */
+        NON_NEGATIVE( 0, Long.MAX_VALUE ),
+        /** Accepts any non-negative value and -1 (>= -1). */
+        TOKEN_NEGATIVE( -1, Long.MAX_VALUE );
+        
+        public final long MIN;
+        public final long MAX;
+        
+        Range( long min, long max ) {
+            MIN = min;
+            MAX = max;
+        }
+    }
+    
+    /**
+     * Represents two number fields, a minimum and a maximum, combined into one.
+     * This has convenience methods for returning a random value between the min and the max (inclusive).
+     */
+    @SuppressWarnings( "ClassCanBeRecord" )
+    public static class RandomRange {
+        
+        /** The minimum. Defines the lower limit of the range (inclusive). */
+        private final LongField MINIMUM;
+        /** The maximum. Defines the upper limit of the range (inclusive). */
+        private final LongField MAXIMUM;
+        
+        /**
+         * Links two values together as minimum and maximum.
+         * <p>
+         * Helper method to automatically generate the minimum and maximum long fields and define them in the spec.
+         * Appends ".min" and ".max" to the provided key, and only supports comments on the first field.
+         */
+        public RandomRange( CrustConfigSpec spec, String keyBase, long defaultMinValue, long defaultMaxValue,
+                            LongField.Range range, @Nullable String... description ) {
+            this( spec, keyBase, defaultMinValue, defaultMaxValue, range.MIN, range.MAX, false, description );
+        }
+        
+        /**
+         * Links two values together as minimum and maximum.
+         * <p>
+         * Helper method to automatically generate the minimum and maximum long fields and define them in the spec.
+         * Appends ".min" and ".max" to the provided key, and only supports comments on the first field.
+         */
+        public RandomRange( CrustConfigSpec spec, String keyBase, long defaultMinValue, long defaultMaxValue,
+                            long min, long max, @Nullable String... description ) {
+            this( spec, keyBase, defaultMinValue, defaultMaxValue, min, max, false, description );
+        }
+        
+        /**
+         * Links two values together as minimum and maximum, optionally flagging the created fields as syncable.
+         * <p>
+         * Helper method to automatically generate the minimum and maximum long fields and define them in the spec.
+         * Appends ".min" and ".max" to the provided key, and only supports comments on the first field.
+         */
+        public RandomRange( CrustConfigSpec spec, String keyBase, long defaultMinValue, long defaultMaxValue,
+                            LongField.Range range, boolean sync, @Nullable String... description ) {
+            this( spec, keyBase, defaultMinValue, defaultMaxValue, range.MIN, range.MAX, sync, description );
+        }
+        
+        /**
+         * Links two values together as minimum and maximum, optionally flagging the created fields as syncable.
+         * <p>
+         * Helper method to automatically generate the minimum and maximum long fields and define them in the spec.
+         * Appends ".min" and ".max" to the provided key, and only supports comments on the first field.
+         */
+        public RandomRange( CrustConfigSpec spec, String keyBase, long defaultMinValue, long defaultMaxValue,
+                            long min, long max, boolean sync, @Nullable String... description ) {
+            this(
+                    spec.define( new LongField( keyBase + ".min", defaultMinValue, min, max, description ), sync ),
+                    spec.define( new LongField( keyBase + ".max", defaultMaxValue, min, max ), sync )
+            );
+        }
+        
+        /** Links two values together as minimum and maximum. */
+        public RandomRange( LongField minimum, LongField maximum ) {
+            MINIMUM = minimum;
+            MAXIMUM = maximum;
+            if( minimum.getDefaultValue() > maximum.getDefaultValue() ) {
+                throw new IllegalArgumentException( String.format( "Random range has inverted default values! (%s > %s) See: (%s, %s)",
+                        minimum.getDefaultValue(), maximum.getDefaultValue(), minimum.getKey(), maximum.getKey() ) );
+            }
+        }
+        
+        /** @return The minimum value of this range. */
+        public long getMin() { return getMinField().getLong(); }
+        
+        /** @return The maximum value of this range. */
+        public long getMax() { return getMaxField().getLong(); }
+        
+        /** @return The minimum value field. */
+        public LongField getMinField() { return MINIMUM; }
+        
+        /** @return The maximum value field. */
+        public LongField getMaxField() { return MAXIMUM; }
+        
+        /** @return A random value between the minimum and the maximum (inclusive). */
+        public long next( RandomSource random ) {
+            try {
+                return CrustMath.nextLong( random, getMin(), getMax() + 1L );
+            }
+            catch( IllegalArgumentException ex ) {
+                warnInvalidRange();
+                return getMin();
+            }
+        }
+        
+        /** @return A random value between the minimum and the maximum (inclusive). */
+        public long next( Random random ) {
+            try {
+                return random.nextLong( getMin(), getMax() + 1L );
+            }
+            catch( IllegalArgumentException ex ) {
+                warnInvalidRange();
+                return getMin();
+            }
+        }
+        
+        /** Convenience method for logging a warning for invalid min-max range. */
+        private void warnInvalidRange() {
+            ConfigUtil.warnFor( MAXIMUM );
+            ConfigUtil.LOG.warn( "Values for range are invalid; min ({}) is greater than max ({})! Ignoring maximum value.",
+                    getMin(), getMax() );
+        }
+    }
+}
