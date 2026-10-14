@@ -1,0 +1,69 @@
+package fathertoast.specialmobs.common.entity.cavespider;
+
+import fathertoast.specialmobs.common.bestiary.BestiaryInfo;
+import fathertoast.specialmobs.common.bestiary.MobFamily;
+import fathertoast.specialmobs.common.bestiary.SpecialMob;
+import fathertoast.specialmobs.common.entity.MobHelper;
+import fathertoast.specialmobs.common.util.References;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
+
+@SpecialMob
+public class WitchCaveSpiderEntity extends _SpecialCaveSpiderEntity {
+    
+    //--------------- Static Special Mob Hooks ----------------
+    
+    @SpecialMob.SpeciesReference
+    public static MobFamily.Species<WitchCaveSpiderEntity> SPECIES;
+    
+    @SpecialMob.BestiaryInfoSupplier
+    public static void getBestiaryInfo( BestiaryInfo.Builder bestiaryInfo ) {
+        bestiaryInfo.color( 0xDD0E0E ).weight( BestiaryInfo.DefaultWeight.LOW ).theme( BestiaryInfo.Theme.FOREST )
+                .uniqueTextureWithEyes()
+                .addExperience( 2 )
+                .spitAttackMultiplied( 0.1, 1.0, 2.0F, 1.0 )
+                .addToAttribute( Attributes.ARMOR, 15.0 );
+    }
+    
+    @SpecialMob.LanguageProvider
+    public static String[] getTranslations( String langKey ) {
+        return References.translations( langKey, "Witch Cave Spider",
+                "", "", "", "", "", "" );//TODO
+    }
+    
+    
+    @SpecialMob.Factory
+    public static EntityType.EntityFactory<WitchCaveSpiderEntity> getVariantFactory() { return WitchCaveSpiderEntity::new; }
+    
+    /** @return This entity's mob species. */
+    @SpecialMob.SpeciesSupplier
+    @Override
+    public MobFamily.Species<? extends WitchCaveSpiderEntity> getSpecies() { return SPECIES; }
+    
+    
+    //--------------- Variant-Specific Implementations ----------------
+    
+    public WitchCaveSpiderEntity( EntityType<? extends _SpecialCaveSpiderEntity> entityType, Level level ) { super( entityType, level ); }
+    
+    /** Override to change the color of this entity's spit attack. */
+    @Override
+    protected int getVariantSpitColor() { return 0x6B0023; } // Witch-spider red
+    
+    /** Override to apply effects when this entity hits a target with a melee attack. */
+    @Override
+    protected void onVariantAttack( LivingEntity target ) {
+        MobHelper.applyWitchSpiderEffect( target, random, false );
+        MobHelper.stealBuffEffect( this, target );
+    }
+    
+    /** @return True if the effect can be applied to this entity. */
+    @Override
+    public boolean canBeAffected( MobEffectInstance effect ) {
+        // Witch spider is immune to debuffs
+        return effect.getEffect().value().getCategory() != MobEffectCategory.HARMFUL && super.canBeAffected( effect );
+    }
+}
