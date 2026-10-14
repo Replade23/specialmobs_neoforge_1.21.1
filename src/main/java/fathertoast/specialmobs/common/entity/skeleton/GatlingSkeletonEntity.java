@@ -1,0 +1,57 @@
+package fathertoast.specialmobs.common.entity.skeleton;
+
+import fathertoast.specialmobs.crust.api.config.common.ConfigManager;
+import fathertoast.specialmobs.common.bestiary.BestiaryInfo;
+import fathertoast.specialmobs.common.bestiary.MobFamily;
+import fathertoast.specialmobs.common.bestiary.SpecialMob;
+import fathertoast.specialmobs.common.config.species.SkeletonSpeciesConfig;
+import fathertoast.specialmobs.common.config.species.SpeciesConfig;
+import fathertoast.specialmobs.common.util.References;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+
+@SpecialMob
+public class GatlingSkeletonEntity extends _SpecialSkeletonEntity {
+    
+    //--------------- Static Special Mob Hooks ----------------
+    
+    @SpecialMob.SpeciesReference
+    public static MobFamily.Species<GatlingSkeletonEntity> SPECIES;
+    
+    @SpecialMob.BestiaryInfoSupplier
+    public static void getBestiaryInfo( BestiaryInfo.Builder bestiaryInfo ) {
+        bestiaryInfo.color( 0xFFFF0B )
+                .modBaseTexture( "textures/entity/skeleton/base_skeleton.png" ).uniqueOverlayTexture()
+                .addExperience( 2 )
+                .multiplyRangedSpread( 2.0 ).multiplyRangedWalkSpeed( 0.3 ).rangedCooldown( 1 )
+                .addToAttribute( Attributes.MAX_HEALTH, 10.0 )
+                .addToAttribute( Attributes.ATTACK_DAMAGE, 2.0 );
+    }
+    
+    @SpecialMob.ConfigSupplier
+    public static SpeciesConfig createConfig( ConfigManager manager, MobFamily.Species<?> species ) {
+        return new SkeletonSpeciesConfig( manager, species, 1.0F, DEFAULT_SHIELD_CHANCE );
+    }
+    
+    @SpecialMob.LanguageProvider
+    public static String[] getTranslations( String langKey ) {
+        return References.translations( langKey, "Gatling Skeleton",
+                "", "", "", "", "", "" );//TODO
+    }
+    
+    
+    @SpecialMob.Factory
+    public static EntityType.EntityFactory<GatlingSkeletonEntity> getVariantFactory() { return GatlingSkeletonEntity::new; }
+    
+    /** @return This entity's mob species. */
+    @SpecialMob.SpeciesSupplier
+    @Override
+    public MobFamily.Species<? extends GatlingSkeletonEntity> getSpecies() { return SPECIES; }
+    
+    
+    //--------------- Variant-Specific Implementations ----------------
+    
+    public GatlingSkeletonEntity( EntityType<? extends _SpecialSkeletonEntity> entityType, Level level ) { super( entityType, level ); }
+}

@@ -1,0 +1,12 @@
+{
+  "values": [
+    "minecraft:zombified_piglin",
+    "specialmobs:zombifiedpiglin",
+    "specialmobs:brutezombifiedpiglin",
+    "specialmobs:fishingzombifiedpiglin",
+    "specialmobs:giantzombifiedpiglin",
+    "specialmobs:hungryzombifiedpiglin",
+    "specialmobs:knightzombifiedpiglin",
+    "specialmobs:plaguezombifiedpiglin"
+  ]
+}

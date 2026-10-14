@@ -1,0 +1,15 @@
+{
+  "values": [
+    "minecraft:cave_spider",
+    "specialmobs:cavespider",
+    "specialmobs:babycavespider",
+    "specialmobs:desertcavespider",
+    "specialmobs:firecavespider",
+    "specialmobs:flyingcavespider",
+    "specialmobs:mothercavespider",
+    "specialmobs:palecavespider",
+    "specialmobs:watercavespider",
+    "specialmobs:webcavespider",
+    "specialmobs:witchcavespider"
+  ]
+}

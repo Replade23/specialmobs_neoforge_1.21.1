@@ -1,0 +1,181 @@
+package fathertoast.specialmobs.common.entity.projectile;
+
+import fathertoast.specialmobs.crust.api.lib.NBTHelper;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import fathertoast.specialmobs.common.core.register.SMEntities;
+import fathertoast.specialmobs.common.core.register.SMItems;
+import fathertoast.specialmobs.common.entity.ghast.CorporealShiftGhastEntity;
+import fathertoast.specialmobs.common.util.ExplosionHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+
+import javax.annotation.Nullable;
+
+@SuppressWarnings( "resource" )
+public class IncorporealFireballEntity extends AbstractHurtingProjectile implements IEntityWithComplexSpawn, ItemSupplier {
+    
+    public static final String TAG_EXPLOSION_POWER = "ExplosionPower";
+    public static final String TAG_TARGET_ID = "TargetId";
+    
+    public int explosionPower = 1;
+    private boolean shouldExplode = false;
+    
+    @Nullable
+    private LivingEntity target;
+    
+    
+    public IncorporealFireballEntity( EntityType<? extends AbstractHurtingProjectile> entityType, Level level ) {
+        super( entityType, level );
+    }
+    
+    public IncorporealFireballEntity( Level level, CorporealShiftGhastEntity ghast, double dx, double dy, double dz ) {
+        super( SMEntities.INCORPOREAL_FIREBALL.get(), ghast, new Vec3( dx, dy, dz ), level );
+        explosionPower = ghast.getExplosionPower();
+        target = ghast.getTarget();
+    }
+    
+    public IncorporealFireballEntity( Level level, @Nullable Player owner, @Nullable LivingEntity target, double x, double y, double z ) {
+        this( SMEntities.INCORPOREAL_FIREBALL.get(), level );
+        this.target = target;
+        setPos( x, y, z );
+        moveTo( x, y, z, getYRot(), getXRot() );
+        reapplyPosition();
+        if( x != 0.0 || y != 0.0 || z != 0.0 ) { setDeltaMovement( new Vec3( x, y, z ).normalize().scale( 0.1 ) ); hasImpulse = true; }
+        if( owner != null ) {
+            setOwner( owner );
+            setRot( owner.getYRot(), owner.getXRot() );
+        }
+    }
+    
+    
+    @Override
+    public void tick() {
+        super.tick();
+        // Fizzle out and die when the target is dead or lost,
+        // or else the fireball goes bonkers.
+        if( target == null || !target.isAlive() ) {
+            playSound( SoundEvents.FIRE_EXTINGUISH, 1.0F, 1.0F );
+            if( !level().isClientSide ) discard();
+            return;
+        }
+        // Follow target
+        Vec3 vec3 = new Vec3(
+                target.getX() - getX(),
+                (target.getY() + (target.getEyeHeight() / 2)) - getY(),
+                target.getZ() - getZ() );
+        setDeltaMovement( vec3.normalize().scale( 0.5 ) );
+        
+        // Boof
+        if( !level().isClientSide && shouldExplode ) explode();
+    }
+    
+    private void explode() {
+        final ExplosionHelper explosion = new ExplosionHelper( this, explosionPower, true, true );
+        if( !explosion.initializeExplosion() ) return;
+        explosion.finalizeExplosion( false );
+        
+        target = null;
+        discard();
+    }
+    
+    @Override
+    protected boolean shouldBurn() {
+        return false;
+    }
+    
+    @Override
+    protected void onHit( HitResult hitResult ) {
+        super.onHit( hitResult );
+    }
+    
+    @Override
+    protected void onHitEntity( EntityHitResult hitResult ) {
+        super.onHitEntity( hitResult );
+        
+        if( !level().isClientSide ) {
+            Entity target = hitResult.getEntity();
+            
+            // Explode if the target is moving
+                if( target.getX() != target.xo || target.getY() != target.yo || target.getZ() != target.zo ) {
+                    explode();
+                    return;
+                }
+            playSound( SoundEvents.FIRE_EXTINGUISH, 1.0F, 1.0F );
+            discard();
+        }
+    }
+    
+    @Override
+    public boolean hurt( DamageSource damageSource, float damage ) {
+        if( isInvulnerableTo( damageSource ) || damageSource.is( DamageTypeTags.IS_FIRE ) ) {
+            return false;
+        }
+        shouldExplode = true;
+        return true;
+    }
+    
+    @Override
+    public ItemStack getItem() {
+        return new ItemStack( SMItems.INCORPOREAL_FIREBALL.get() );
+    }
+    
+    @Override
+    public void addAdditionalSaveData( CompoundTag saveTag ) {
+        super.addAdditionalSaveData( saveTag );
+        saveTag.putInt( TAG_EXPLOSION_POWER, explosionPower );
+        saveTag.putInt( TAG_TARGET_ID, target == null ? -1 : target.getId() );
+    }
+    
+    @Override
+    public void readAdditionalSaveData( CompoundTag saveTag ) {
+        super.readAdditionalSaveData( saveTag );
+        
+        if( NBTHelper.containsNumber( saveTag, TAG_EXPLOSION_POWER ) )
+            explosionPower = saveTag.getInt( TAG_EXPLOSION_POWER );
+        
+        if( NBTHelper.containsNumber( saveTag, TAG_TARGET_ID ) ) {
+            Entity entity = level().getEntity( saveTag.getInt( TAG_TARGET_ID ) );
+            
+            if( entity instanceof LivingEntity ) {
+                target = (LivingEntity) entity;
+            }
+        }
+    }
+    
+    @Override
+    public void writeSpawnData( RegistryFriendlyByteBuf buffer ) {
+        final Entity owner = getOwner();
+        buffer.writeInt( owner == null ? 0 : owner.getId() );
+        buffer.writeInt( target == null ? 0 : target.getId() );
+    }
+    
+    @Override
+    public void readSpawnData( RegistryFriendlyByteBuf additionalData ) {
+        final int ownerId = additionalData.readInt();
+        final int targetId = additionalData.readInt();
+        
+        setOwner( level().getEntity( ownerId ) );
+        
+        if( level().getEntity( targetId ) instanceof LivingEntity ) {
+            target = (LivingEntity) level().getEntity( targetId );
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:magma_cube",
+    "specialmobs:magmacube",
+    "specialmobs:bouncingmagmacube",
+    "specialmobs:hardenedmagmacube",
+    "specialmobs:stickymagmacube",
+    "specialmobs:volatilemagmacube"
+  ]
+}

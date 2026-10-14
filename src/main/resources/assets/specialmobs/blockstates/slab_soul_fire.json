@@ -1,0 +1,172 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "north": "false",
+        "east": "false",
+        "south": "false",
+        "west": "false",
+        "up": "false"
+      },
+      "apply": [
+        {
+          "model": "specialmobs:block/slab_soul_fire_floor0"
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_floor1"
+        }
+      ]
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": [
+        {
+          "model": "specialmobs:block/slab_soul_fire_up0"
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_up1"
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_up_alt0"
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_up_alt1"
+        }
+      ]
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "false",
+            "east": "false",
+            "south": "false",
+            "west": "false",
+            "up": "false"
+          },
+          {
+            "north": "true"
+          }
+        ]
+      },
+      "apply": [
+        {
+          "model": "specialmobs:block/slab_soul_fire_side0"
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side1"
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt0"
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt1"
+        }
+      ]
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "false",
+            "east": "false",
+            "south": "false",
+            "west": "false",
+            "up": "false"
+          },
+          {
+            "east": "true"
+          }
+        ]
+      },
+      "apply": [
+        {
+          "model": "specialmobs:block/slab_soul_fire_side0",
+          "y": 90
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side1",
+          "y": 90
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt0",
+          "y": 90
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt1",
+          "y": 90
+        }
+      ]
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "false",
+            "east": "false",
+            "south": "false",
+            "west": "false",
+            "up": "false"
+          },
+          {
+            "south": "true"
+          }
+        ]
+      },
+      "apply": [
+        {
+          "model": "specialmobs:block/slab_soul_fire_side0",
+          "y": 180
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side1",
+          "y": 180
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt0",
+          "y": 180
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt1",
+          "y": 180
+        }
+      ]
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "false",
+            "east": "false",
+            "south": "false",
+            "west": "false",
+            "up": "false"
+          },
+          {
+            "west": "true"
+          }
+        ]
+      },
+      "apply": [
+        {
+          "model": "specialmobs:block/slab_soul_fire_side0",
+          "y": 270
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side1",
+          "y": 270
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt0",
+          "y": 270
+        },
+        {
+          "model": "specialmobs:block/slab_soul_fire_side_alt1",
+          "y": 270
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "values": [
+    "specialmobs:skeleton",
+    "specialmobs:bruteskeleton",
+    "specialmobs:fireskeleton",
+    "specialmobs:gatlingskeleton",
+    "specialmobs:giantskeleton",
+    "specialmobs:knightskeleton",
+    "specialmobs:ninjaskeleton",
+    "specialmobs:pirateskeleton",
+    "specialmobs:poisonskeleton",
+    "specialmobs:sniperskeleton",
+    "specialmobs:spitfireskeleton",
+    "specialmobs:strayskeleton",
+    "specialmobs:weatheredskeleton",
+    "specialmobs:witherskeleton",
+    "specialmobs:brutewitherskeleton",
+    "specialmobs:gatlingwitherskeleton",
+    "specialmobs:giantwitherskeleton",
+    "specialmobs:knightwitherskeleton",
+    "specialmobs:ninjawitherskeleton",
+    "specialmobs:sniperwitherskeleton"
+  ]
+}

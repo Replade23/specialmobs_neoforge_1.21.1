@@ -1,0 +1,53 @@
+package fathertoast.specialmobs.common.entity.enderman;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+
+import fathertoast.specialmobs.common.bestiary.BestiaryInfo;
+import fathertoast.specialmobs.common.bestiary.MobFamily;
+import fathertoast.specialmobs.common.bestiary.SpecialMob;
+import fathertoast.specialmobs.common.util.References;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
+
+@SpecialMob
+public class MiniEndermanEntity extends _SpecialEndermanEntity {
+    
+    //--------------- Static Special Mob Hooks ----------------
+    
+    @SpecialMob.SpeciesReference
+    public static MobFamily.Species<MiniEndermanEntity> SPECIES;
+    
+    @SpecialMob.BestiaryInfoSupplier
+    public static void getBestiaryInfo( BestiaryInfo.Builder bestiaryInfo ) {
+        bestiaryInfo.color( 0xFFC0CB )
+                .modBaseTexture( "textures/entity/enderman/base_enderman.png" ).modEyesTexture( "textures/entity/enderman/base_enderman_eyes.png" )
+                .weight( BestiaryInfo.DefaultWeight.LOW )
+                .size( 0.35F, 0.5F, 0.99F )
+                .addExperience( 1 )
+                .addToAttribute( Attributes.ATTACK_DAMAGE, -2.0 )
+                .multiplyAttribute( Attributes.MOVEMENT_SPEED, 1.3 );
+    }
+    
+    @SpecialMob.LanguageProvider
+    public static String[] getTranslations( String langKey ) {
+        return References.translations( langKey, "Mini Enderman",
+                "", "", "", "", "", "" );//TODO
+    }
+    
+    
+    @SpecialMob.Factory
+    public static EntityType.EntityFactory<MiniEndermanEntity> getVariantFactory() { return MiniEndermanEntity::new; }
+    
+    /** @return This entity's mob species. */
+    @SpecialMob.SpeciesSupplier
+    @Override
+    public MobFamily.Species<? extends MiniEndermanEntity> getSpecies() { return SPECIES; }
+    
+    
+    //--------------- Variant-Specific Implementations ----------------
+    
+    public MiniEndermanEntity( EntityType<? extends _SpecialEndermanEntity> entityType, Level level ) {
+        super( entityType, level );
+        { final AttributeInstance step = getAttribute( Attributes.STEP_HEIGHT ); if( step != null ) step.setBaseValue( 0.5 ); }
+    }
+}

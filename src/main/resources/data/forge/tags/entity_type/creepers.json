@@ -1,0 +1,23 @@
+{
+  "values": [
+    "minecraft:creeper",
+    "specialmobs:creeper",
+    "specialmobs:darkcreeper",
+    "specialmobs:deathcreeper",
+    "specialmobs:dirtcreeper",
+    "specialmobs:doomcreeper",
+    "specialmobs:drowningcreeper",
+    "specialmobs:endercreeper",
+    "specialmobs:firecreeper",
+    "specialmobs:gravelcreeper",
+    "specialmobs:implodingcreeper",
+    "specialmobs:jumpingcreeper",
+    "specialmobs:lightningcreeper",
+    "specialmobs:minicreeper",
+    "specialmobs:sandcreeper",
+    "specialmobs:scopecreeper",
+    "specialmobs:snowcreeper",
+    "specialmobs:skeletoncreeper",
+    "specialmobs:splittingcreeper"
+  ]
+}

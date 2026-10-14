@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "fathertoast.specialmobs.common.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [
+    "AbstractArrowMixin",
+    "BlazeEntityMixin",
+    "PiglinAiMixin",
+    "ThrownTridentMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

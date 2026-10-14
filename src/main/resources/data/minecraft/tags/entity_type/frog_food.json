@@ -1,0 +1,18 @@
+{
+  "values": [
+    "specialmobs:slime",
+    "specialmobs:blackberryslime",
+    "specialmobs:blueberryslime",
+    "specialmobs:caramelslime",
+    "specialmobs:grapeslime",
+    "specialmobs:lemonslime",
+    "specialmobs:potionslime",
+    "specialmobs:strawberryslime",
+    "specialmobs:watermelonslime",
+    "specialmobs:magmacube",
+    "specialmobs:bouncingmagmacube",
+    "specialmobs:hardenedmagmacube",
+    "specialmobs:stickymagmacube",
+    "specialmobs:volatilemagmacube"
+  ]
+}

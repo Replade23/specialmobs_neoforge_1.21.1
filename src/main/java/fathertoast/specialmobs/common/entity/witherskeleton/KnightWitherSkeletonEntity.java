@@ -1,0 +1,78 @@
+package fathertoast.specialmobs.common.entity.witherskeleton;
+
+import fathertoast.specialmobs.crust.api.config.common.ConfigManager;
+import fathertoast.specialmobs.common.bestiary.BestiaryInfo;
+import fathertoast.specialmobs.common.bestiary.MobFamily;
+import fathertoast.specialmobs.common.bestiary.SpecialMob;
+import fathertoast.specialmobs.common.config.species.SkeletonSpeciesConfig;
+import fathertoast.specialmobs.common.config.species.SpeciesConfig;
+import fathertoast.specialmobs.common.util.References;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+
+import javax.annotation.Nullable;
+
+@SpecialMob
+public class KnightWitherSkeletonEntity extends _SpecialWitherSkeletonEntity {
+    
+    //--------------- Static Special Mob Hooks ----------------
+    
+    @SpecialMob.SpeciesReference
+    public static MobFamily.Species<KnightWitherSkeletonEntity> SPECIES;
+    
+    @SpecialMob.BestiaryInfoSupplier
+    public static void getBestiaryInfo( BestiaryInfo.Builder bestiaryInfo ) {
+        bestiaryInfo.color( 0xDDDDDD )
+                .modBaseTexture( "textures/entity/wither_skeleton/base_wither_skeleton.png" )
+                .addExperience( 2 ).multiplyRangedSpread( 1.2 )
+                .addToAttribute( Attributes.MAX_HEALTH, 10.0 ).addToAttribute( Attributes.ARMOR, 10.0 )
+                .addToAttribute( Attributes.ATTACK_DAMAGE, 4.0 ).addToRangedDamage( 4.0 )
+                .multiplyAttribute( Attributes.MOVEMENT_SPEED, 0.8 );
+    }
+    
+    @SpecialMob.ConfigSupplier
+    public static SpeciesConfig createConfig( ConfigManager manager, MobFamily.Species<?> species ) {
+        return new SkeletonSpeciesConfig( manager, species, 0.05, 1.0 );
+    }
+    
+    @SpecialMob.LanguageProvider
+    public static String[] getTranslations( String langKey ) {
+        return References.translations( langKey, "Wither Skeleton Knight",
+                "", "", "", "", "", "" );//TODO
+    }
+    
+    
+    @SpecialMob.Factory
+    public static EntityType.EntityFactory<KnightWitherSkeletonEntity> getVariantFactory() { return KnightWitherSkeletonEntity::new; }
+    
+    /** @return This entity's mob species. */
+    @SpecialMob.SpeciesSupplier
+    @Override
+    public MobFamily.Species<? extends KnightWitherSkeletonEntity> getSpecies() { return SPECIES; }
+    
+    
+    //--------------- Variant-Specific Implementations ----------------
+    
+    public KnightWitherSkeletonEntity( EntityType<? extends _SpecialWitherSkeletonEntity> entityType, Level level ) { super( entityType, level ); }
+    
+    /** Override to change starting equipment or stats. */
+    @Override
+    public void finalizeVariantSpawn( ServerLevelAccessor level, DifficultyInstance difficulty, @Nullable MobSpawnType spawnType,
+                                      @Nullable SpawnGroupData groupData ) {
+        if( getItemBySlot( EquipmentSlot.MAINHAND ).getItem() == Items.STONE_SWORD ) {
+            setItemSlot( EquipmentSlot.MAINHAND, new ItemStack( Items.IRON_SWORD ) );
+        }
+        setItemSlot( EquipmentSlot.HEAD, new ItemStack( Items.CHAINMAIL_HELMET ) );
+        setItemSlot( EquipmentSlot.CHEST, new ItemStack( Items.CHAINMAIL_CHESTPLATE ) );
+        setItemSlot( EquipmentSlot.LEGS, new ItemStack( Items.CHAINMAIL_LEGGINGS ) );
+        setItemSlot( EquipmentSlot.FEET, new ItemStack( Items.CHAINMAIL_BOOTS ) );
+    }
+}

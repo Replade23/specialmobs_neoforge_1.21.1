@@ -1,0 +1,14 @@
+{
+  "values": [
+    "minecraft:enderman",
+    "specialmobs:enderman",
+    "specialmobs:blindingenderman",
+    "specialmobs:flameenderman",
+    "specialmobs:icyenderman",
+    "specialmobs:lightningenderman",
+    "specialmobs:minienderman",
+    "specialmobs:mirageenderman",
+    "specialmobs:runicenderman",
+    "specialmobs:thiefenderman"
+  ]
+}

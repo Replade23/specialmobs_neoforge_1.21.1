@@ -1,0 +1,13 @@
+{
+  "values": [
+    "minecraft:wither_skeleton",
+    "specialmobs:witherskeleton",
+    "specialmobs:brutewitherskeleton",
+    "specialmobs:gatlingwitherskeleton",
+    "specialmobs:giantwitherskeleton",
+    "specialmobs:knightwitherskeleton",
+    "specialmobs:ninjawitherskeleton",
+    "specialmobs:sniperwitherskeleton",
+    "specialmobs:spitfirewitherskeleton"
+  ]
+}

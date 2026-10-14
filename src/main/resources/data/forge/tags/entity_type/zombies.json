@@ -1,0 +1,15 @@
+{
+  "values": [
+    "minecraft:zombie",
+    "specialmobs:zombie",
+    "specialmobs:brutezombie",
+    "specialmobs:firezombie",
+    "specialmobs:fishingzombie",
+    "specialmobs:frozenzombie",
+    "specialmobs:giantzombie",
+    "specialmobs:hungryzombie",
+    "specialmobs:huskzombie",
+    "specialmobs:madscientistzombie",
+    "specialmobs:plaguezombie"
+  ]
+}

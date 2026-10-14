@@ -1,0 +1,172 @@
+package fathertoast.specialmobs.common.entity.enderman;
+
+import fathertoast.specialmobs.crust.api.lib.EntityEventHelper;
+import fathertoast.specialmobs.common.bestiary.BestiaryInfo;
+import fathertoast.specialmobs.common.bestiary.MobFamily;
+import fathertoast.specialmobs.common.bestiary.SpecialMob;
+import fathertoast.specialmobs.common.core.register.SMTags;
+import fathertoast.specialmobs.common.entity.MobHelper;
+import fathertoast.specialmobs.common.entity.ai.AIHelper;
+import fathertoast.specialmobs.common.entity.ai.FluidPathNavigator;
+import fathertoast.specialmobs.common.util.References;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
+
+import java.util.List;
+
+@SpecialMob
+public class IcyEndermanEntity extends _SpecialEndermanEntity {
+    
+    //--------------- Static Special Mob Hooks ----------------
+    
+    @SpecialMob.SpeciesReference
+    public static MobFamily.Species<IcyEndermanEntity> SPECIES;
+    
+    @SpecialMob.BestiaryInfoSupplier
+    public static void getBestiaryInfo( BestiaryInfo.Builder bestiaryInfo ) {
+        bestiaryInfo.color( 0xDDEAEA ).theme( BestiaryInfo.Theme.ICE )
+                .uniqueTextureWithEyes()
+                .addExperience( 1 ).effectImmune( MobEffects.MOVEMENT_SLOWDOWN );
+        
+    }
+    
+    @SpecialMob.LanguageProvider
+    public static String[] getTranslations( String langKey ) {
+        return References.translations( langKey, "Icy Enderman",
+                "", "", "", "", "", "" );//TODO
+    }
+    
+    
+    @SpecialMob.EntityTagProvider
+    public static List<TagKey<EntityType<?>>> getEntityTags() {
+        return List.of( SMTags.EntityTypes.ENDERMEN, EntityTypeTags.FREEZE_IMMUNE_ENTITY_TYPES );
+    }
+    
+    @SpecialMob.Factory
+    public static EntityType.EntityFactory<IcyEndermanEntity> getVariantFactory() { return IcyEndermanEntity::new; }
+    
+    /** @return This entity's mob species. */
+    @SpecialMob.SpeciesSupplier
+    @Override
+    public MobFamily.Species<? extends IcyEndermanEntity> getSpecies() { return SPECIES; }
+    
+    
+    //--------------- Variant-Specific Implementations ----------------
+    
+    public IcyEndermanEntity( EntityType<? extends _SpecialEndermanEntity> entityType, Level level ) {
+        super( entityType, level );
+        setPathfindingMalus( PathType.WATER, PathType.WALKABLE.getMalus() );
+    }
+    
+    /** Override to apply effects when this entity hits a target with a melee attack. */
+    @Override
+    protected void onVariantAttack( LivingEntity target ) {
+        MobHelper.applyEffect( target, MobEffects.MOVEMENT_SLOWDOWN, 4, 0.5F );
+        MobHelper.applyEffect( target, MobEffects.DIG_SLOWDOWN, 2 );
+    }
+    
+    /** Override to change this entity's AI goals. */
+    @Override
+    protected void registerVariantGoals() {
+        AIHelper.replaceWaterAvoidingRandomWalking( this, 1.0 );
+    }
+    
+    /** @return A new path navigator for this entity to use. */
+    @Override
+    protected PathNavigation createNavigation( Level level ) {
+        return new FluidPathNavigator( this, level, true, false );
+    }
+    
+    /** @return Whether this entity can stand on a particular type of fluid. */
+    @Override
+    public boolean canStandOnFluid( FluidState fluid ) { return fluid.is( FluidTags.WATER ); }
+    
+    /** Called whenever this entity's block position changes. */
+    @Override
+    protected void onChangedBlock( net.minecraft.server.level.ServerLevel serverLevel, BlockPos pos ) {
+        super.onChangedBlock( serverLevel, pos );
+        updateFrostWalker( pos );
+    }
+    
+    /** @return Teleports this enderman to a new position; returns true if successful. */
+    @Override
+    protected boolean teleport( double x, double y, double z ) {
+        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos( x, y, z );
+        
+        while( pos.getY() > 0 ) {
+            // Allow icy endermen to teleport on top of water
+            final BlockState block = level().getBlockState( pos );
+            // noinspection deprecation
+            if( block.blocksMotion() || block.getFluidState().is( FluidTags.WATER ) ) {
+                final EntityTeleportEvent.EnderEntity event = EventHooks.onEnderTeleport( this, x, y + 1, z );
+                if( event.isCanceled() ) return false;
+                
+                final boolean success = uncheckedTeleport( event.getTargetX(), event.getTargetY(), event.getTargetZ(), true );
+                if( success ) {
+                    updateFrostWalker( pos.immutable().above() );
+                    if( !isSilent() ) {
+                        level().playSound( null, xo, yo, zo, SoundEvents.ENDERMAN_TELEPORT, getSoundSource(),
+                                1.0F, 1.0F );
+                        playSound( SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F );
+                    }
+                }
+                return success;
+            }
+            else {
+                pos.move( Direction.DOWN );
+                y--;
+            }
+        }
+        return false;
+    }
+    
+    /** This is #randomTeleport, but uses a pre-determined y-coord. */
+    @SuppressWarnings( "SameParameterValue" ) // Don't care; maintain vanilla's method signature
+    private boolean uncheckedTeleport( double x, double y, double z, boolean spawnParticles ) {
+        // Can't teleport if in a vehicle
+        if( this.isPassenger() ) return false;
+        
+        final double xI = getX();
+        final double yI = getY();
+        final double zI = getZ();
+        
+        //noinspection deprecation
+        if( level().hasChunkAt( BlockPos.containing( x, y, z ) ) ) {
+            teleportTo( x, y, z );
+            
+            if( level().noCollision( this ) && !level().containsAnyLiquid( getBoundingBox() ) ) {
+                if( spawnParticles ) EntityEventHelper.TELEPORT_TRAIL_PARTICLES.broadcast( this );
+                getNavigation().stop();
+                return true;
+            }
+        }
+        teleportTo( xI, yI, zI );
+        return false;
+    }
+    
+    /** Override to load data from this entity's NBT data. */
+    @Override
+    public void readVariantSaveData( CompoundTag saveTag ) {
+        setPathfindingMalus( PathType.WATER, PathType.WALKABLE.getMalus() );
+    }
+    
+    /** Called to make the frost walker ice platform around this entity, as needed. */
+    private void updateFrostWalker( BlockPos pos ) { MobHelper.updateFrostWalker( this, pos, 1 ); }
+}

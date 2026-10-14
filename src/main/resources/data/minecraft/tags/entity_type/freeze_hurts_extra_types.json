@@ -1,0 +1,27 @@
+{
+  "values": [
+    "specialmobs:firecreeper",
+    "specialmobs:firezombie",
+    "specialmobs:fireskeleton",
+    "specialmobs:spitfireskeleton",
+    "specialmobs:spitfirewitherskeleton",
+    "specialmobs:magmacube",
+    "specialmobs:bouncingmagmacube",
+    "specialmobs:hardenedmagmacube",
+    "specialmobs:stickymagmacube",
+    "specialmobs:volatilemagmacube",
+    "specialmobs:firespider",
+    "specialmobs:firecavespider",
+    "specialmobs:firesilverfish",
+    "specialmobs:flameenderman",
+    "specialmobs:blaze",
+    "specialmobs:armoredblaze",
+    "specialmobs:cinderblaze",
+    "specialmobs:conflagrationblaze",
+    "specialmobs:emberblaze",
+    "specialmobs:hellfireblaze",
+    "specialmobs:infernoblaze",
+    "specialmobs:joltblaze",
+    "specialmobs:wildfireblaze"
+  ]
+}

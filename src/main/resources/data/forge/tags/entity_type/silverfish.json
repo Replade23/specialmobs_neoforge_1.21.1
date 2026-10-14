@@ -1,0 +1,15 @@
+{
+  "values": [
+    "minecraft:silverfish",
+    "specialmobs:silverfish",
+    "specialmobs:albinosilverfish",
+    "specialmobs:blindingsilverfish",
+    "specialmobs:desiccatedsilverfish",
+    "specialmobs:firesilverfish",
+    "specialmobs:fishingsilverfish",
+    "specialmobs:flyingsilverfish",
+    "specialmobs:poisonsilverfish",
+    "specialmobs:puffersilverfish",
+    "specialmobs:toughsilverfish"
+  ]
+}
