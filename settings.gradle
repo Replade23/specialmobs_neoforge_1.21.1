@@ -1,0 +1,10 @@
+// Dove Gradle cerca i plugin di build. Il plugin di NeoForge (ModDevGradle)
+// non e' sul portale standard, quindi aggiungiamo il maven di NeoForged.
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.neoforged.net/releases' }
+    }
+}
+
+rootProject.name = 'specialmobs'
